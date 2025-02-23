@@ -1,5 +1,4 @@
 import { Controller, Get, Post, Put, Delete, Body, Param } from "@nestjs/common";
-import { v4 as uuid } from 'uuid';
 import { TasksService } from "./tasks.service";
 import CreateTaskDto from "./tasks-dto/create-task.dto";
 

@@ -28,8 +28,8 @@ export class TasksService {
 
     addTask(taskInput: CreateTaskDto): Task[] {
         let newTask: Task = {
+            ...taskInput,
             id: uuid(),
-            ...taskInput
         }
         this.tasks.push(newTask);
         return this.tasks;

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
 // types
 import Task from './types/Task';
 import CreateTaskDto from './tasks-dto/create-task.dto';
@@ -17,62 +16,31 @@ export class TasksService {
         private tasksRepository: Repository<TaskEntity>
     ) {}
 
-    private _tasks: Task[] = [
-        {
-          "id": uuid(),
-          "title": "Fist Task",
-          "description": "que pasa si pongo un texto muy muy muy muy largo. El largo de la card no deberia verse afectado pero si su alto",
-          "completed": false,
-          "order": 0
-        },
-        {
-          "id": uuid(),
-          "title": "Second Task",
-          "description": "getting used to it",
-          "completed": false,
-          "order": 1
-        }
-    ];
-
-    get orderedTasks() {
-        return [...this._tasks].sort((a, b) => a.order - b.order);
+    orderTasks(tasks: Task[]): Task[] {
+        return tasks.sort((a, b) => a.order - b.order);
     }
 
-    getTasks(): Promise<Task[]> {
-        //return this.orderedTasks;
-        return this.tasksRepository.find();
+    async getTasks(): Promise<Task[]> {
+        return this.tasksRepository.find()
+        .then(this.orderTasks);
     }
 
-    addTask(taskInput: CreateTaskDto): Task[] {
-        let newTask: Task = {
+    async addTask(taskInput: CreateTaskDto): Promise<Task[]> {
+        let numberOfTasks = await this.tasksRepository.count()
+        await this.tasksRepository.save({
             ...taskInput,
-            id: uuid(),
-            order: this._tasks.length
-        }
-        this._tasks.push(newTask);
-        return this.orderedTasks;
+            order: numberOfTasks
+        });
+        return this.getTasks();
     }
 
-    updateTask(taskInput: UpdateTaskDto): Task[] {
-        const index = this._tasks.findIndex(task => task.id === taskInput.id);
-    
-        if (index === -1) {
-            throw new Error("Task not found");
-        }
-    
-        this._tasks[index] = { ...this._tasks[index], ...taskInput };
-    
-        return this.orderedTasks;
+    async updateTask(taskInput: UpdateTaskDto): Promise<Task[]> {
+        await this.tasksRepository.update(taskInput.id, taskInput);
+        return this.getTasks();
     }
 
-    deleteTask(id: string): Task[] {
-        const index = this._tasks.findIndex(task => task.id === id);
-
-        if (index === -1) {
-            throw new Error("Task not found");
-        }
-
-        this._tasks.splice(index, 1);
-        return this.orderedTasks;
+    async deleteTask(id: string): Promise<Task[]> {
+        await this.tasksRepository.delete(id);
+        return this.getTasks();
     }
 }

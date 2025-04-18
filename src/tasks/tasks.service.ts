@@ -4,9 +4,18 @@ import { v4 as uuid } from 'uuid';
 import Task from './types/Task';
 import CreateTaskDto from './tasks-dto/create-task.dto';
 import UpdateTaskDto from './tasks-dto/update-task.dto';
+// database connection
+import { Task as TaskEntity } from './entities/task.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TasksService {
+
+    constructor(
+        @InjectRepository(TaskEntity)
+        private tasksRepository: Repository<TaskEntity>
+    ) {}
 
     private _tasks: Task[] = [
         {
@@ -29,8 +38,9 @@ export class TasksService {
         return [...this._tasks].sort((a, b) => a.order - b.order);
     }
 
-    getTasks(): Task[] {
-        return this.orderedTasks;
+    getTasks(): Promise<Task[]> {
+        //return this.orderedTasks;
+        return this.tasksRepository.find();
     }
 
     addTask(taskInput: CreateTaskDto): Task[] {

@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import TasksModule from './tasks/tasks.module'; 
+import { TasksModule } from './tasks/tasks.module'; 
 // database connection
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Task } from './tasks/entities/task.entity';
 
 @Module({
   imports: [
@@ -10,7 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      entities: [],
+      entities: [Task],
       synchronize: true,
       ssl: {
         rejectUnauthorized: false,
